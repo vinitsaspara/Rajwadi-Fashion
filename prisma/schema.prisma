@@ -8,8 +8,273 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
+  id          String    @id @default(uuid())
+
+  name        String
+  email       String    @unique
+  password    String
+
+  phone       String?
+
+  role        Role      @default(CUSTOMER)
+
+  isVerified  Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  orders      Order[]
+  cartItems   CartItem[]
+  wishlists   Wishlist[]
+  reviews     Review[]
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+model Category {
+  id          String    @id @default(uuid())
+
+  name        String    @unique
+
+  slug        String    @unique
+
+  image       String?
+
+  description String?
+
+  isActive    Boolean   @default(true)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+}
+
+
+model Product {
+  id              String      @id @default(uuid())
+
+  name            String
+  slug            String      @unique
+  sku             String?     @unique
+
+  description     String
+
+  price           Decimal     @db.Decimal(10,2)
+  discountPrice   Decimal?    @db.Decimal(10,2)
+
+  averageRating   Float       @default(0)
+
+  isFeatured      Boolean     @default(false)
+  isBestSeller    Boolean     @default(false)
+  isActive Boolean @default(true)
+
+  categoryId      String
+  category        Category    @relation(fields: [categoryId], references: [id])
+
+  colors          ProductColor[]
+
+  reviews         Review[]
+  cartItems       CartItem[]
+  wishlistItems   Wishlist[]
+  orderItems      OrderItem[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([categoryId])
+}
+
+model ProductColor {
+  id          String   @id @default(uuid())
+
+  colorName   String
+
+  images      String[]
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  sizes       ProductVariant[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([productId, colorName])
+  @@index([productId])
+}
+
+model ProductVariant {
+  id              String        @id @default(uuid())
+
+  size            ProductSize
+
+  stock           Int           @default(0)
+
+  productColorId  String
+  color           ProductColor  @relation(fields: [productColorId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([productColorId, size])
+}
+
+enum ProductSize {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+model Order {
+  id              String        @id @default(uuid())
+
+  orderNumber     String        @unique
+
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+
+  totalAmount     Decimal       @db.Decimal(10,2)
+
+  status          OrderStatus   @default(PENDING)
+
+  shippingAddress Json
+
+  paymentMethod   String?
+
+  orderItems      OrderItem[]
+
+  payment         Payment?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+
+model OrderItem {
+  id          String   @id @default(uuid())
+
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+
+  color       String?
+  size        ProductSize?
+
+  quantity    Int
+
+  price       Decimal  @db.Decimal(10,2)
+
+  createdAt   DateTime @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model CartItem {
+  id          String   @id @default(uuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+
+  color       String?
+  size        ProductSize?
+
+  quantity    Int      @default(1)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, productId, color, size])
+}
+
+model Wishlist {
+  id          String   @id @default(uuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Coupon {
+  id                String   @id @default(uuid())
+
+  code              String   @unique
+
+  discountPercent   Int
+
+  minimumAmount     Decimal? @db.Decimal(10,2)
+
+  expiryDate        DateTime
+
+  isActive          Boolean  @default(true)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Review {
+  id          String   @id @default(uuid())
+
+  rating      Int
+
+  comment     String?
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@unique([userId, productId])
+}
+
+model Payment {
+  id                String         @id @default(uuid())
+
+  orderId           String         @unique
+  order             Order          @relation(fields: [orderId], references: [id])
+
+  razorpayOrderId   String
+  razorpayPaymentId String?
+
+  amount            Decimal        @db.Decimal(10,2)
+
+  status            PaymentStatus  @default(PENDING)
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }

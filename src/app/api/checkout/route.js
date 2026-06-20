@@ -14,35 +14,29 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const validation =
-      checkoutSchema.safeParse(body);
+    const validation = checkoutSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            validation.error.errors[0].message,
+          message: validation.error.errors[0].message,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const {
-      couponCode,
-      shippingAddress,
-    } = validation.data;
+    const { couponCode, shippingAddress } = validation.data;
 
-    const cartItems =
-      await prisma.cartItem.findMany({
-        where: {
-          userId: user.id,
-        },
+    const cartItems = await prisma.cartItem.findMany({
+      where: {
+        userId: user.id,
+      },
 
-        include: {
-          product: true,
-        },
-      });
+      include: {
+        product: true,
+      },
+    });
 
     if (!cartItems.length) {
       return NextResponse.json(
@@ -50,34 +44,32 @@ export async function POST(request) {
           success: false,
           message: "Cart is empty",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    let subtotal =
-      calculateCartTotal(cartItems);
+    let subtotal = calculateCartTotal(cartItems);
 
     let discount = 0;
 
     if (couponCode) {
-      const coupon =
-        await prisma.coupon.findFirst({
-          where: {
-            code: couponCode,
-            isActive: true,
-          },
-        });
+      const coupon = await prisma.coupon.findFirst({
+        where: {
+          code: couponCode,
+          isActive: true,
+        },
+      });
 
-      if (coupon) {
-        discount =
-          (subtotal *
-            coupon.discountPercent) /
-          100;
+      if (
+        coupon &&
+        coupon.expiryDate > new Date() &&
+        subtotal >= Number(coupon.minimumAmount)
+      ) {
+        discount = (subtotal * coupon.discountPercent) / 100;
       }
     }
 
-    const finalAmount =
-      subtotal - discount;
+    const finalAmount = subtotal - discount;
 
     return NextResponse.json({
       success: true,
@@ -96,7 +88,7 @@ export async function POST(request) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

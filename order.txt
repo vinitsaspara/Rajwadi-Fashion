@@ -90,3 +90,56 @@ src
 └── utils
 ├── apiResponse.js
 └── generateSlug.js
+
+
+Phase 1 — Project Setup
+Next.js Setup
+Tailwind Setup
+Folder Structure
+Axios Configuration
+Redux Toolkit Setup
+Environment Variables
+
+
+Phase 2 — Customer UI
+Home Page
+Product Listing Page
+Product Details Page
+Search & Filters
+Cart
+Wishlist
+
+
+Phase 3 — Authentication
+Register
+Login
+Forgot Password
+Profile
+
+
+Phase 4 — Address Management
+Address List
+Add Address
+Edit Address
+
+
+Phase 5 — Checkout
+Select Address
+Apply Coupon
+Payment
+Order Success
+
+
+Phase 6 — Orders
+My Orders
+Order Details
+Track Order
+
+
+Phase 7 — Admin Dashboard
+Dashboard
+Categories
+Products
+Orders
+Coupons
+Customers

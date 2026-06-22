@@ -7,9 +7,9 @@ import {
   persistStore,
 } from "redux-persist";
 
-import authReducer from "./slices/authSlice";
-import cartReducer from "./slices/cartSlice";
-import wishlistReducer from "./slices/wishlistSlice";
+import authReducer from "./slices/authSlice.js";
+import cartReducer from "./slices/cartSlice.js";
+import wishlistReducer from "./slices/whishlistSlice.js";
 
 const rootReducer = combineReducers({
   auth: authReducer,

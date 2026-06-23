@@ -124,3 +124,35 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    const user = await authMiddleware();
+
+    const deletedItems =
+      await prisma.cartItem.deleteMany({
+        where: {
+          userId: user.id,
+        },
+      });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Cart cleared successfully",
+        deletedCount: deletedItems.count,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.log(error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}

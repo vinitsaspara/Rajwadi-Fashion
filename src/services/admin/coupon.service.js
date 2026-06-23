@@ -1,40 +1,39 @@
 import api from "@/lib/axios";
 
-export const cartService = {
-  getCart: async () => {
+export const couponService = {
+  // Get All Coupons
+  getCoupons: async () => {
     const response = await api.get(
-      "/cart"
+      "/admin/coupons"
     );
 
     return response.data;
   },
 
-  addToCart: async (data) => {
+  // Create Coupon
+  createCoupon: async (data) => {
     const response = await api.post(
-      "/cart",
+      "/admin/coupons",
       data
     );
 
     return response.data;
   },
 
-  updateCart: async (
-    cartItemId,
-    data
-  ) => {
+  // Update Coupon
+  updateCoupon: async (id, data) => {
     const response = await api.patch(
-      `/cart/${cartItemId}`,
+      `/admin/coupons/${id}`,
       data
     );
 
     return response.data;
   },
 
-  removeFromCart: async (
-    cartItemId
-  ) => {
+  // Delete Coupon (Soft Delete)
+  deleteCoupon: async (id) => {
     const response = await api.delete(
-      `/cart/${cartItemId}`
+      `/admin/coupons/${id}`
     );
 
     return response.data;

@@ -3,18 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { adminMiddleware } from "@/middleware/admin";
 import { generateSlug } from "@/utils/generateSlug";
 
-export async function GET(
-  request,
-  { params }
-) {
+export async function GET(request, { params }) {
   try {
-     const { id } = await params;
-    const category =
-      await prisma.category.findUnique({
-        where: {
-          id,
-        },
-      });
+    const { id } = await params;
+    const category = await prisma.category.findUnique({
+      where: {
+        id,
+      },
+    });
 
     if (!category) {
       return NextResponse.json(
@@ -22,7 +18,7 @@ export async function GET(
           success: false,
           message: "Category not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -31,7 +27,7 @@ export async function GET(
         success: true,
         category,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     return NextResponse.json(
@@ -39,38 +35,31 @@ export async function GET(
         success: false,
         message: "Internal Server Error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-
-export async function PATCH(
-  request,
-  { params }
-) {
+export async function PATCH(request, { params }) {
   try {
     await adminMiddleware();
 
     const body = await request.json();
-     const { id } = await params;
+    const { id } = await params;
 
+    const { name, image, description } = body;
 
-    const { name, image, description } =
-      body;
-
-    const category =
-      await prisma.category.update({
-        where: {
-          id
-        },
-        data: {
-          name,
-          image,
-          description,
-          slug: generateSlug(name),
-        },
-      });
+    const category = await prisma.category.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+        image,
+        description,
+        slug: generateSlug(name),
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -82,25 +71,20 @@ export async function PATCH(
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-
-export async function DELETE(
-  request,
-  { params }
-) {
+export async function DELETE(request, { params }) {
   try {
     await adminMiddleware();
 
-     const { id } = await params;
+    const { id } = await params;
 
-
-    await prisma.category.de({
+    await prisma.category.update({
       where: {
-        id
+        id,
       },
       data: {
         isActive: false,
@@ -109,8 +93,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message:
-        "Category deleted successfully",
+      message: "Category deleted successfully",
     });
   } catch (error) {
     return NextResponse.json(
@@ -118,7 +101,7 @@ export async function DELETE(
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,10 +1,10 @@
 import api from "@/lib/axios";
 
-export const couponService = {
-  validateCoupon: async (code) => {
+export const reviewService = {
+  addReview: async (data) => {
     const response = await api.post(
-      "/coupons/validate",
-      { code }
+      "/reviews",
+      data
     );
 
     return response.data;

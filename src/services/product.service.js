@@ -1,10 +1,10 @@
 import api from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/apiEndpoints";
 
 export const productService = {
+  // Get All Products
   getProducts: async (params = {}) => {
     const response = await api.get(
-      API_ENDPOINTS.PRODUCTS.GET_ALL,
+      "/products",
       {
         params,
       }
@@ -13,33 +13,39 @@ export const productService = {
     return response.data;
   },
 
-  getProductBySlug: async (slug) => {
+  // Get Product By Id
+  getProductById: async (id) => {
     const response = await api.get(
-      API_ENDPOINTS.PRODUCTS.GET_BY_SLUG(slug)
+      `/products/${id}`
     );
 
     return response.data;
   },
 
-  getFeaturedProducts: async () => {
-    const response = await api.get(
-      API_ENDPOINTS.PRODUCTS.FEATURED
+  // Create Product
+  createProduct: async (data) => {
+    const response = await api.post(
+      "/products",
+      data
     );
 
     return response.data;
   },
 
-  getNewArrivals: async () => {
-    const response = await api.get(
-      API_ENDPOINTS.PRODUCTS.NEW_ARRIVALS
+  // Update Product
+  updateProduct: async (id, data) => {
+    const response = await api.patch(
+      `/products/${id}`,
+      data
     );
 
     return response.data;
   },
 
-  getBestSellers: async () => {
-    const response = await api.get(
-      API_ENDPOINTS.PRODUCTS.BEST_SELLERS
+  // Delete Product (Soft Delete)
+  deleteProduct: async (id) => {
+    const response = await api.delete(
+      `/products/${id}`
     );
 
     return response.data;

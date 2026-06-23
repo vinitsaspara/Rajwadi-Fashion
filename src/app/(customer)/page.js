@@ -1,18 +1,13 @@
-import Container from "@/components/layout/Container";
+import HeroSection from "@/components/home/HeroSection";
+import CategoriesSection from "@/components/home/CategoriesSection";
+import FeaturedProductsSection from "@/components/home/FeaturedProductsSection";
 
 export default function HomePage() {
   return (
-    <Container>
-      <section className="py-20">
-        <h1 className="text-5xl font-bold">
-          Rajwadi Fashion
-        </h1>
-
-        <p className="mt-4">
-          Premium Kurtis & Chaniya Choli
-          Collection
-        </p>
-      </section>
-    </Container>
+    <>
+      <HeroSection />
+      <CategoriesSection />
+      <FeaturedProductsSection />
+    </>
   );
 }

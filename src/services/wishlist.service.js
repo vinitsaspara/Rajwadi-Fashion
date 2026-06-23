@@ -1,10 +1,9 @@
 import api from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/apiEndpoints";
 
 export const wishlistService = {
   getWishlist: async () => {
     const response = await api.get(
-      API_ENDPOINTS.WISHLIST.GET
+      "/wishlist"
     );
 
     return response.data;
@@ -12,16 +11,18 @@ export const wishlistService = {
 
   addToWishlist: async (data) => {
     const response = await api.post(
-      API_ENDPOINTS.WISHLIST.ADD,
+      "/wishlist",
       data
     );
 
     return response.data;
   },
 
-  removeWishlistItem: async (id) => {
+  removeFromWishlist: async (
+    productId
+  ) => {
     const response = await api.delete(
-      `${API_ENDPOINTS.WISHLIST.REMOVE}/${id}`
+      `/wishlist/${productId}`
     );
 
     return response.data;

@@ -3,17 +3,15 @@ export const API_ENDPOINTS = {
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
     LOGOUT: "/auth/logout",
-    PROFILE: "/auth/profile",
-    FORGOT_PASSWORD: "/auth/forgot-password",
-    RESET_PASSWORD: "/auth/reset-password",
+    PROFILE: "/auth/me"
   },
 
   PRODUCTS: {
-    GET_ALL: "/products",
-    GET_BY_SLUG: (slug) => `/products/${slug}`,
-    FEATURED: "/products/featured",
-    NEW_ARRIVALS: "/products/new-arrivals",
-    BEST_SELLERS: "/products/best-sellers",
+    GET_ALL: "/product",
+    GET_BY_ID: (id) => `/product/${id}`,
+    CREATE: "/product",
+    UPDATE: (id) => `/product/${id}`,
+    DELETE: (id) => `/product/${id}`,
   },
 
   CATEGORIES: {

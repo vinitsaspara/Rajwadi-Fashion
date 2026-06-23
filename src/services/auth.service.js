@@ -1,10 +1,9 @@
 import api from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/apiEndpoints";
 
 export const authService = {
   register: async (data) => {
     const response = await api.post(
-      API_ENDPOINTS.AUTH.REGISTER,
+      "/auth/register",
       data
     );
 
@@ -13,8 +12,16 @@ export const authService = {
 
   login: async (data) => {
     const response = await api.post(
-      API_ENDPOINTS.AUTH.LOGIN,
+      "/auth/login",
       data
+    );
+
+    return response.data;
+  },
+
+  getCurrentUser: async () => {
+    const response = await api.get(
+      "/auth/me"
     );
 
     return response.data;
@@ -22,15 +29,7 @@ export const authService = {
 
   logout: async () => {
     const response = await api.post(
-      API_ENDPOINTS.AUTH.LOGOUT
-    );
-
-    return response.data;
-  },
-
-  getProfile: async () => {
-    const response = await api.get(
-      API_ENDPOINTS.AUTH.PROFILE
+      "/auth/logout"
     );
 
     return response.data;

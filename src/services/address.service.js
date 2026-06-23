@@ -1,18 +1,17 @@
 import api from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/apiEndpoints";
 
 export const addressService = {
   getAddresses: async () => {
     const response = await api.get(
-      API_ENDPOINTS.ADDRESS.GET_ALL
+      "/address"
     );
 
     return response.data;
   },
 
-  createAddress: async (data) => {
+  addAddress: async (data) => {
     const response = await api.post(
-      API_ENDPOINTS.ADDRESS.CREATE,
+      "/address",
       data
     );
 

@@ -39,4 +39,12 @@ export const cartService = {
 
     return response.data;
   },
+
+  clearCart: async () => {
+    const response = await api.delete(
+      "/cart"
+    );
+
+    return response.data;
+  },
 };

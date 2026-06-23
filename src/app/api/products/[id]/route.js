@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { adminMiddleware } from "@/middleware/admin";
 
 import { generateSlug } from "@/utils/generateSlug";
+import { updateProductSchema } from "@/validations/product.validation";
 
 export async function GET(
   request,
@@ -15,9 +16,10 @@ export async function GET(
     const {id} = await params;
 
     const product =
-      await prisma.product.findUnique({
+      await prisma.product.findFirst({
         where: {
-          id
+          id,
+          isActive: true,
         },
 
         include: {
@@ -76,8 +78,19 @@ export async function PATCH(
 
     await adminMiddleware();
 
-    const body =
-      await request.json();
+    const body = await request.json();
+
+    const validation = updateProductSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: validation.error.issues[0].message,
+        },
+        { status: 400 }
+      );
+    }
 
     const {id} = await params
 
@@ -89,13 +102,53 @@ export async function PATCH(
       categoryId,
       isFeatured,
       isBestSeller,
-    } = body;
+      isActive,
+      colors,
+    } = validation.data;
 
-    const product =
-      await prisma.product.update({
+    if (categoryId) {
+      const category = await prisma.category.findFirst({
         where: {
-          id
+          id: categoryId,
+          isActive: true,
         },
+      });
+
+      if (!category) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Category not found",
+          },
+          { status: 404 }
+        );
+      }
+    }
+
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!existingProduct) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Product not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    const product = await prisma.$transaction(async (tx) => {
+      if (colors !== undefined) {
+        await tx.productColor.deleteMany({
+          where: { productId: id },
+        });
+      }
+
+      return tx.product.update({
+        where: { id },
 
         data: {
           name,
@@ -116,8 +169,35 @@ export async function PATCH(
           isFeatured,
 
           isBestSeller,
+
+          isActive,
+
+          ...(colors !== undefined && {
+            colors: {
+              create: colors.map((color) => ({
+                colorName: color.colorName,
+                images: color.images,
+                sizes: {
+                  create: color.sizes.map((variant) => ({
+                    size: variant.size,
+                    stock: variant.stock,
+                  })),
+                },
+              })),
+            },
+          }),
+        },
+
+        include: {
+          category: true,
+          colors: {
+            include: {
+              sizes: true,
+            },
+          },
         },
       });
+    });
 
     return NextResponse.json({
       success: true,

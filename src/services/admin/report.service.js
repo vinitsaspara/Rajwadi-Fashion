@@ -4,7 +4,7 @@ export const reportService = {
   // Sales Report
   getSalesReport: async () => {
     const response = await api.get(
-      "/reports/sales"
+      "/admin/reports/sales"
     );
 
     return response.data;
@@ -13,7 +13,7 @@ export const reportService = {
   // Revenue Report
   getRevenueReport: async () => {
     const response = await api.get(
-      "/reports/revenue"
+      "/admin/reports/revenue"
     );
 
     return response.data;
@@ -22,7 +22,7 @@ export const reportService = {
   // Product Report
   getProductReport: async () => {
     const response = await api.get(
-      "/reports/products"
+      "/admin/reports/products"
     );
 
     return response.data;
@@ -31,7 +31,7 @@ export const reportService = {
   // Customer Report
   getCustomerReport: async () => {
     const response = await api.get(
-      "/reports/customers"
+      "/admin/reports/customers"
     );
 
     return response.data;
@@ -40,7 +40,7 @@ export const reportService = {
   // Export CSV
   exportCsv: async () => {
     const response = await api.get(
-      "/reports/export-csv",
+      "/admin/reports/export-csv",
       {
         responseType: "blob",
       }
@@ -52,7 +52,7 @@ export const reportService = {
   // Export Excel
   exportExcel: async () => {
     const response = await api.get(
-      "/reports/export-excel",
+      "/admin/reports/export-excel",
       {
         responseType: "blob",
       }

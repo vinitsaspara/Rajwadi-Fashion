@@ -161,6 +161,8 @@ export async function GET(request) {
       searchParams.get("isFeatured");
 
     const where = {
+      isActive: true,
+
       ...(search && {
         name: {
           contains: search,

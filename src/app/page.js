@@ -1,11 +1,11 @@
 import React from 'react'
 
-const MobileMenu = () => {
+const page = () => {
   return (
     <div>
-      
+      Rajwadi Fashion
     </div>
   )
 }
 
-export default MobileMenu
+export default page

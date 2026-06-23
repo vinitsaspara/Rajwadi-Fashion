@@ -17,4 +17,21 @@ export const addressService = {
 
     return response.data;
   },
+
+  updateAddress: async (id, data) => {
+    const response = await api.patch(
+      `/address/${id}`,
+      data
+    );
+
+    return response.data;
+  },
+
+  deleteAddress: async (id) => {
+    const response = await api.delete(
+      `/address/${id}`
+    );
+
+    return response.data;
+  },
 };

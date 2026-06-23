@@ -4,7 +4,7 @@ export const orderService = {
   // Get All Orders (Admin)
   getOrders: async () => {
     const response = await api.get(
-      "/orders"
+      "/admin/orders"
     );
 
     return response.data;
@@ -16,7 +16,7 @@ export const orderService = {
     status
   ) => {
     const response = await api.patch(
-      `/orders/${id}/status`,
+      `/admin/orders/${id}/status`,
       {
         status,
       }

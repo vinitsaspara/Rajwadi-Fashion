@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { authMiddleware } from "@/middleware/auth";
+import { createAddressSchema } from "@/validations/address.validation";
 
 
 export async function POST(request) {
@@ -11,7 +12,28 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    if (body.isDefault) {
+    const validation = createAddressSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: validation.error.issues[0].message,
+        },
+        { status: 400 }
+      );
+    }
+
+    const addressCount = await prisma.address.count({
+      where: { userId: user.id },
+    });
+
+    const data = {
+      ...validation.data,
+      isDefault: validation.data.isDefault || addressCount === 0,
+    };
+
+    if (data.isDefault) {
       await prisma.address.updateMany({
         where: {
           userId: user.id,
@@ -25,7 +47,7 @@ export async function POST(request) {
     const address =
       await prisma.address.create({
         data: {
-          ...body,
+          ...data,
           userId: user.id,
         },
       });

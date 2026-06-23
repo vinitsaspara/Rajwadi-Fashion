@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import razorpay from "@/lib/razorpay";
+import { getRazorpayClient } from "@/lib/razorpay";
 
 import { authMiddleware } from "@/middleware/auth";
 
@@ -12,7 +12,7 @@ export async function POST(request) {
       await request.json();
 
     const razorpayOrder =
-      await razorpay.orders.create({
+      await getRazorpayClient().orders.create({
         amount: amount * 100,
 
         currency: "INR",

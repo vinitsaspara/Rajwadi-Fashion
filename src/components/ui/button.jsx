@@ -2,11 +2,11 @@ import React from "react";
 
 const variants = {
   primary:
-    "bg-black text-white hover:bg-neutral-800",
+    "bg-brand text-white hover:bg-brand-dark transition-colors duration-200",
   secondary:
-    "border border-black text-black hover:bg-gray-100",
+    "border-2 border-stone-300 text-black hover:border-brand hover:bg-orange-50 transition-colors duration-200",
   danger:
-    "bg-red-500 text-white hover:bg-red-600",
+    "bg-red-500 text-white hover:bg-red-600 transition-colors duration-200",
 };
 
 const Button = ({

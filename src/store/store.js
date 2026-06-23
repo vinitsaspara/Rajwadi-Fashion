@@ -10,11 +10,13 @@ import {
 import authReducer from "./slices/authSlice.js";
 import cartReducer from "./slices/cartSlice.js";
 import wishlistReducer from "./slices/whishlistSlice.js";
+import productReducer from "./slices/productSlice.js";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   cart: cartReducer,
   wishlist: wishlistReducer,
+  product: productReducer,
 });
 
 const persistConfig = {

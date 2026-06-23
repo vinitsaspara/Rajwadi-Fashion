@@ -4,7 +4,7 @@ export const dashboardService = {
   // Dashboard Statistics
   getDashboardStats: async () => {
     const response = await api.get(
-      "/dashboard"
+      "/admin/dashboard"
     );
 
     return response.data;
@@ -13,7 +13,7 @@ export const dashboardService = {
   // Revenue Chart Data
   getRevenueChart: async () => {
     const response = await api.get(
-      "/dashboard/revenue-chart"
+      "/admin/dashboard/revenue-chart"
     );
 
     return response.data;
@@ -22,7 +22,7 @@ export const dashboardService = {
   // Top Products
   getTopProducts: async () => {
     const response = await api.get(
-      "/dashboard/top-products"
+      "/admin/dashboard/top-products"
     );
 
     return response.data;

@@ -1,11 +1,23 @@
-import React from 'react'
+import Hero from "@/components/home/Hero";
+import Categories from "@/components/home/Categories";
+import FeaturedProducts from "@/components/home/FeaturedProducts";
+import NewArrivals from "@/components/home/NewArrivals";
+import WhyChooseUs from "@/components/home/WhyChooseUs";
+import Newsletter from "@/components/home/Newsletter";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
-const page = () => {
+export default function HomePage() {
   return (
-    <div>
-      Rajwadi Fashion
-    </div>
-  )
+    <>
+    <Navbar/>
+      <Hero />
+      <Categories />
+      <FeaturedProducts />
+      <NewArrivals />
+      <WhyChooseUs />
+      <Newsletter />
+      <Footer/>
+    </>
+  );
 }
-
-export default page

@@ -143,3 +143,46 @@ Products
 Orders
 Coupons
 Customers
+
+
+
+frontend
+
+Redux + Axios Setup
+Customer Layout (Navbar + Footer)
+Home Page
+Product Listing Page
+Product Details Page
+Login/Register
+Cart
+Wishlist
+Address Management
+Checkout + Razorpay
+Orders
+Admin Dashboard
+
+src
+│
+├── app
+│
+├── components
+│   ├── ui
+│   ├── layout
+│   ├── product
+│   ├── cart
+│   ├── checkout
+│   └── shared
+│
+├── redux
+│   ├── store.js
+│   └── slices
+│
+├── services
+│
+├── hooks
+│
+├── lib
+│
+├── utils
+│
+└── constants

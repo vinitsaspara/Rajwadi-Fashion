@@ -1,37 +1,35 @@
-import api from "@/lib/axios";
+import axiosInstance from "./axios";
 
-export const authService = {
-  register: async (data) => {
-    const response = await api.post(
-      "/auth/register",
-      data
-    );
+export const registerUser = async (data) => {
+  const response = await axiosInstance.post(
+    "/auth/register",
+    data
+  );
 
-    return response.data;
-  },
+  return response.data;
+};
 
-  login: async (data) => {
-    const response = await api.post(
-      "/auth/login",
-      data
-    );
+export const loginUser = async (data) => {
+  const response = await axiosInstance.post(
+    "/auth/login",
+    data
+  );
 
-    return response.data;
-  },
+  return response.data;
+};
 
-  getCurrentUser: async () => {
-    const response = await api.get(
-      "/auth/me"
-    );
+export const logoutUser = async () => {
+  const response = await axiosInstance.post(
+    "/auth/logout"
+  );
 
-    return response.data;
-  },
+  return response.data;
+};
 
-  logout: async () => {
-    const response = await api.post(
-      "/auth/logout"
-    );
+export const getProfile = async () => {
+  const response = await axiosInstance.get(
+    "/auth/me"
+  );
 
-    return response.data;
-  },
+  return response.data;
 };

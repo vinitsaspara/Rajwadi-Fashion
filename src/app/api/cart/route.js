@@ -105,6 +105,7 @@ export async function GET() {
           product: {
             include: {
               category: true,
+              colors: true,
             },
           },
         },

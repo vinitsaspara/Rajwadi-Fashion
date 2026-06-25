@@ -11,7 +11,7 @@ export async function PATCH(request, { params }) {
 
     const { cartItemId } = await params;
 
-    // console.log("cartItetmId : ", cartItemId);
+    console.log("cartItetmId : ", cartItemId);
 
     const { quantity } = await request.json();
 

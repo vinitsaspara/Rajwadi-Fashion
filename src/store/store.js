@@ -4,6 +4,8 @@ import authReducer from "./slices/authSlice";
 import cartReducer from "./slices/cartSlice";
 import productReducer from "./slices/productSlice";
 import categoryReducer from "./slices/categorySlice";
+import addressReducer from "./slices/addressSlice"
+import wishlistReducer from "./slices/wishlistSlice"
 
 import {
   persistStore,
@@ -17,6 +19,8 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   product: productReducer,
   category: categoryReducer,
+  address: addressReducer,
+  wishlist: wishlistReducer
 });
 
 const persistConfig = {
@@ -26,6 +30,10 @@ const persistConfig = {
   whitelist: [
     "auth",
     "cart",
+    "product",
+    "category",
+    "address",
+    "wishlist"
   ],
 };
 

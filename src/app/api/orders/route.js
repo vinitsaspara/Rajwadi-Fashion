@@ -7,34 +7,40 @@ export async function GET() {
   try {
     const user = await authMiddleware();
 
-    const orders =
-      await prisma.order.findMany({
-        where: {
-          userId: user.id,
-        },
+    const orders = await prisma.order.findMany({
+      where: {
+        userId: user.id,
+      },
 
-        include: {
-          orderItems: {
-            include: {
-              product: true,
-            },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
           },
-
-          payment: true,
         },
 
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
+        payment: true,
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
     return NextResponse.json({
       success: true,
       orders,
+      orderItems: {
+        include: {
+          product: {
+            include: {
+              colors: true,
+            },
+          },
+        },
+      },
     });
-
   } catch (error) {
-
     return NextResponse.json(
       {
         success: false,
@@ -42,7 +48,7 @@ export async function GET() {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

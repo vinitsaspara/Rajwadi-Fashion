@@ -3,55 +3,55 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { authMiddleware } from "@/middleware/auth";
 
-export async function GET(
-  request,
-  { params }
-) {
+export async function GET(request, { params }) {
   try {
+    const user = await authMiddleware();
 
-    const user =
-      await authMiddleware();
+    const { id } = await params;
 
-    const {id} = await params
+    const order = await prisma.order.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
 
-    const order =
-      await prisma.order.findFirst({
-        where: {
-          id,
-          userId: user.id,
-        },
-
-        include: {
-          orderItems: {
-            include: {
-              product: true,
-            },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
           },
-
-          payment: true,
         },
-      });
+
+        payment: true,
+      },
+    });
 
     if (!order) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Order not found",
+          message: "Order not found",
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
     return NextResponse.json({
       success: true,
       order,
+      orderItems: {
+        include: {
+          product: {
+            include: {
+              colors: true,
+            },
+          },
+        },
+      },
     });
-
   } catch (error) {
-
     return NextResponse.json(
       {
         success: false,
@@ -59,7 +59,7 @@ export async function GET(
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

@@ -1,5 +1,5 @@
 import Container from "../shared/Container";
-import ProductCard from "../home/ProductCard";
+import ProductCard from "@/components/product/ProductCard";
 
 const arrivals = [
   {

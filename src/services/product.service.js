@@ -50,3 +50,17 @@ export const getProductById = async (id) => {
 
   return response.data;
 };
+
+export const searchProducts = async (
+  query,
+  limit = 8
+) => {
+  const response =
+    await axiosInstance.get(
+      `/products/search?q=${encodeURIComponent(
+        query
+      )}&limit=${limit}`
+    );
+
+  return response.data;
+};

@@ -1,107 +1,167 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Star } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+import { addReview } from "@/services/review.service";
+
 export default function ReviewForm({
-  initialData,
-  onSubmit,
-  loading,
+  productId,
+  refreshProduct,
 }) {
-  const [rating, setRating] = useState(
-    initialData?.rating || 5
-  );
+  const [rating, setRating] =
+    useState(0);
 
   const [comment, setComment] =
-    useState(
-      initialData?.comment || ""
-    );
+    useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [hover, setHover] =
+    useState(0);
 
-    onSubmit({
-      rating,
-      comment,
-    });
-  };
+  const [loading, setLoading] =
+    useState(false);
+
+  const handleSubmit =
+    async (e) => {
+      e.preventDefault();
+
+      if (!rating) {
+        toast.error(
+          "Please select rating"
+        );
+        return;
+      }
+
+      if (!comment.trim()) {
+        toast.error(
+          "Please enter comment"
+        );
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        await addReview({
+          productId,
+          rating,
+          comment,
+        });
+
+        toast.success(
+          "Review added successfully"
+        );
+
+        setRating(0);
+        setComment("");
+
+        if (refreshProduct) {
+          refreshProduct();
+        }
+      } catch (error) {
+        toast.error(
+          error.response?.data
+            ?.message ||
+            "Failed to submit review"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6"
-    >
-      {/* Rating */}
+    <div className="border rounded-xl p-6">
 
-      <div>
+      <h2 className="text-2xl font-semibold mb-6">
+        Write a Review
+      </h2>
 
-        <p className="font-medium mb-3">
-          Rating
-        </p>
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
 
-        <div className="flex gap-2">
+        {/* Rating */}
 
-          {[1, 2, 3, 4, 5].map(
-            (star) => (
-              <button
-                type="button"
-                key={star}
-                onClick={() =>
-                  setRating(star)
-                }
-              >
-                <Star
-                  size={28}
-                  className={
-                    star <= rating
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
+        <div>
+
+          <label className="font-medium">
+            Rating
+          </label>
+
+          <div className="flex gap-2 mt-3">
+
+            {[1, 2, 3, 4, 5].map(
+              (star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onMouseEnter={() =>
+                    setHover(star)
                   }
-                />
-              </button>
-            )
-          )}
+                  onMouseLeave={() =>
+                    setHover(0)
+                  }
+                  onClick={() =>
+                    setRating(star)
+                  }
+                >
+                  <Star
+                    className={`h-8 w-8 transition ${
+                      (hover || rating) >=
+                      star
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                </button>
+              )
+            )}
+
+          </div>
 
         </div>
 
-      </div>
+        {/* Comment */}
 
-      {/* Comment */}
+        <div>
 
-      <div>
+          <label className="font-medium">
+            Comment
+          </label>
 
-        <p className="font-medium mb-3">
-          Review
-        </p>
+          <Textarea
+            rows={5}
+            className="mt-2"
+            placeholder="Share your experience..."
+            value={comment}
+            onChange={(e) =>
+              setComment(
+                e.target.value
+              )
+            }
+          />
 
-        <Textarea
-          rows={5}
-          value={comment}
-          placeholder="Write your review..."
-          onChange={(e) =>
-            setComment(
-              e.target.value
-            )
-          }
-        />
+        </div>
 
-      </div>
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full"
+        >
+          {loading
+            ? "Submitting..."
+            : "Submit Review"}
+        </Button>
 
-      <Button
-        type="submit"
-        disabled={loading}
-      >
-        {loading
-          ? "Saving..."
-          : initialData
-          ? "Update Review"
-          : "Submit Review"}
-      </Button>
-    </form>
+      </form>
+
+    </div>
   );
 }

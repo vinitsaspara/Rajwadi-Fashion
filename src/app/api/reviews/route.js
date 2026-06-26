@@ -20,7 +20,7 @@ export async function POST(request) {
         {
           success: false,
           message:
-            validation.error.errors[0].message,
+            validation.error.issues[0].message,
         },
         { status: 400 }
       );
@@ -102,6 +102,49 @@ export async function POST(request) {
         message: error.message,
       },
       { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const user =
+      await authMiddleware();
+
+    const reviews =
+      await prisma.review.findMany({
+        where: {
+          userId: user.id,
+        },
+
+        include: {
+          product: {
+            include: {
+              colors: true,
+              category: true,
+            },
+          },
+        },
+
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+    return NextResponse.json({
+      success: true,
+      reviews,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          error.message,
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

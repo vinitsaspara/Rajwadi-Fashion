@@ -1,5 +1,13 @@
 import axiosInstance from "./axios";
 
+export const getReviews = async () => {
+  const response = await axiosInstance.get(
+    "/reviews"
+  );
+
+  return response.data;
+};
+
 export const addReview = async (data) => {
   const response = await axiosInstance.post(
     "/reviews",

@@ -7,7 +7,7 @@ import { Package, LayoutGrid } from "lucide-react";
 import { Heart, ShoppingCart, LogOut } from "lucide-react";
 
 import Container from "../shared/Container";
-
+import SearchInput from "@/components/search/SearchInput";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,13 +24,9 @@ export default function Navbar() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const cart = useSelector(
-  (state) => state.cart.cart
-);
+  const cart = useSelector((state) => state.cart.cart);
 
-const wishlist = useSelector(
-  (state) => state.wishlist.wishlist
-);
+  const wishlist = useSelector((state) => state.wishlist.wishlist);
 
   const user = useSelector((state) => state.auth.user);
 
@@ -39,8 +35,6 @@ const wishlist = useSelector(
 
     router.push("/");
   };
-
-  
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
@@ -72,55 +66,34 @@ const wishlist = useSelector(
             </Link>
 
             <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full border rounded-lg px-4 py-2 outline-none"
-              />
-            </div>
+  <SearchInput />
+</div>
           </div>
 
           {/* Actions */}
 
           <div className="flex items-center gap-4">
+            <Link href="/wishlist" className="relative group">
+              <Heart
+                size={22}
+                className="transition group-hover:text-red-500"
+              />
 
-            
-            <Link
-  href="/wishlist"
-  className="relative group"
->
-  <Heart
-    size={22}
-    className="transition group-hover:text-red-500"
-  />
-
-  {wishlist.length > 0 && (
-    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-md border-2 border-white font-semibold">
-      {wishlist.length}
-    </span>
-  )}
-</Link>
+              {wishlist.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-md border-2 border-white font-semibold">
+                  {wishlist.length}
+                </span>
+              )}
+            </Link>
 
             <Link href="/cart" className="relative">
               <ShoppingCart size={22} />
 
-              {
-  cart.length > 0 && (
-    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-md border-2 border-white font-semibold">
-      {
-        cart.reduce(
-          (
-            total,
-            item
-          ) =>
-            total +
-            item.quantity,
-          0
-        )
-      }
-    </span>
-  )
-}
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-md border-2 border-white font-semibold">
+                  {cart.reduce((total, item) => total + item.quantity, 0)}
+                </span>
+              )}
             </Link>
 
             {user ? (

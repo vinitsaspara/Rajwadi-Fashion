@@ -1,116 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-import { useSelector } from "react-redux";
-
-import { toast } from "sonner";
-
-import {
-  addReview,
-  updateReview,
-  deleteReview,
-} from "@/services/review.service";
-
-import ReviewCard from "./ReviewCard";
 import ReviewForm from "./ReviewForm";
-import ReviewStars from "./ReviewStars";
-
-import { Button } from "@/components/ui/button";
+import ProductReviewCard from "./ProductReviewCard";
+import ReviewRating from "./ReviewRating";
 
 export default function ReviewSection({
   product,
   refreshProduct,
 }) {
-  const user = useSelector(
-    (state) => state.auth.user
-  );
+  const reviews =
+    product.reviews || [];
 
-  const [loading, setLoading] =
-    useState(false);
-
-  const myReview = useMemo(
-    () =>
-      product.reviews.find(
-        (review) =>
-          review.user?.id === user?.id
-      ),
-    [product.reviews, user]
-  );
-
-  const handleSubmit =
-    async (data) => {
-      try {
-        setLoading(true);
-
-        if (myReview) {
-          await updateReview(
-            myReview.id,
-            {
-              productId:
-                product.id,
-              ...data,
-            }
-          );
-
-          toast.success(
-            "Review updated"
-          );
-        } else {
-          await addReview({
-            productId:
-              product.id,
-            ...data,
-          });
-
-          toast.success(
-            "Review added"
-          );
-        }
-
-        refreshProduct();
-      } catch (error) {
-        toast.error(
-          error.response?.data
-            ?.message ||
-            "Something went wrong"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  const handleDelete =
-    async () => {
-      try {
-        setLoading(true);
-
-        await deleteReview(
-          myReview.id
-        );
-
-        toast.success(
-          "Review deleted"
-        );
-
-        refreshProduct();
-      } catch (error) {
-        toast.error(
-          error.response?.data
-            ?.message ||
-            "Failed to delete review"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const averageRating =
+    Number(
+      product.averageRating || 0
+    );
 
   return (
-    <section className="mt-14">
+    <div className="max-w-7xl mx-auto px-4 pb-20">
 
       {/* Header */}
 
-      <div className="mb-8">
+      <div className="mb-10">
 
         <h2 className="text-3xl font-bold">
           Customer Reviews
@@ -118,94 +29,85 @@ export default function ReviewSection({
 
         <div className="flex items-center gap-3 mt-3">
 
-          <ReviewStars
+          <ReviewRating
             rating={Math.round(
-              product.averageRating
+              averageRating
             )}
+            size={22}
           />
 
-          <span className="font-medium">
-            {Number(
-              product.averageRating
-            ).toFixed(1)}
+          <span className="font-semibold text-lg">
+            {averageRating.toFixed(
+              1
+            )}
           </span>
 
           <span className="text-muted-foreground">
             (
-            {
-              product.reviews.length
-            }{" "}
-            Reviews)
+            {reviews.length}
+            {" "}
+            Review
+            {reviews.length !== 1
+              ? "s"
+              : ""}
+            )
           </span>
 
         </div>
 
       </div>
 
+      {/* Review Form */}
+
+      <ReviewForm
+        productId={product.id}
+        refreshProduct={
+          refreshProduct
+        }
+      />
+
       {/* Reviews */}
 
-      <div className="space-y-4">
+      <div className="mt-12">
 
-        {product.reviews.length ===
+        {reviews.length ===
         0 ? (
-          <p className="text-muted-foreground">
-            No reviews yet.
-          </p>
+          <div className="border rounded-xl py-16 text-center">
+
+            <h3 className="text-2xl font-semibold">
+
+              No Reviews Yet
+
+            </h3>
+
+            <p className="text-muted-foreground mt-2">
+
+              Be the first customer to review this product.
+
+            </p>
+
+          </div>
         ) : (
-          product.reviews.map(
-            (review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-              />
-            )
-          )
+          <div className="space-y-6">
+
+            {reviews.map(
+              (review) => (
+                <ProductReviewCard
+                  key={
+                    review.id
+                  }
+                  review={
+                    review
+                  }
+                />
+              )
+            )}
+
+          </div>
         )}
 
       </div>
 
-      {/* Form */}
-
-      {user && (
-        <div className="mt-12 border rounded-xl p-6">
-
-          <h3 className="text-xl font-semibold mb-6">
-
-            {myReview
-              ? "Edit Your Review"
-              : "Write a Review"}
-
-          </h3>
-
-          <ReviewForm
-            initialData={
-              myReview
-            }
-            loading={
-              loading
-            }
-            onSubmit={
-              handleSubmit
-            }
-          />
-
-          {myReview && (
-            <Button
-              variant="destructive"
-              className="mt-4"
-              disabled={
-                loading
-              }
-              onClick={
-                handleDelete
-              }
-            >
-              Delete Review
-            </Button>
-          )}
-
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

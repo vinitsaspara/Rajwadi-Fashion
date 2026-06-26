@@ -7,51 +7,49 @@ import { adminMiddleware } from "@/middleware/admin";
 import { generateSlug } from "@/utils/generateSlug";
 import { updateProductSchema } from "@/validations/product.validation";
 
-export async function GET(
-  request,
-  { params }
-) {
+export async function GET(request, { params }) {
   try {
+    const { id } = await params;
 
-    const {id} = await params;
+    const product = await prisma.product.findFirst({
+      where: {
+        id,
+        isActive: true,
+      },
 
-    const product =
-      await prisma.product.findFirst({
-        where: {
-          id,
-          isActive: true,
+      include: {
+        category: true,
+
+        colors: {
+          include: {
+            sizes: true,
+          },
         },
 
-        include: {
-          category: true,
-
-          colors: {
-            include: {
-              sizes: true,
-            },
-          },
-
-          reviews: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                },
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },
+
+          orderBy: {
+            createdAt: "desc",
+          },
         },
-      });
+      },
+    });
 
     if (!product) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Product not found",
+          message: "Product not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -65,17 +63,13 @@ export async function GET(
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-export async function PATCH(
-  request,
-  { params }
-) {
+export async function PATCH(request, { params }) {
   try {
-
     await adminMiddleware();
 
     const body = await request.json();
@@ -88,11 +82,11 @@ export async function PATCH(
           success: false,
           message: validation.error.issues[0].message,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const {id} = await params
+    const { id } = await params;
 
     const {
       name,
@@ -120,7 +114,7 @@ export async function PATCH(
             success: false,
             message: "Category not found",
           },
-          { status: 404 }
+          { status: 404 },
         );
       }
     }
@@ -136,7 +130,7 @@ export async function PATCH(
           success: false,
           message: "Product not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -153,10 +147,7 @@ export async function PATCH(
         data: {
           name,
 
-          slug:
-            name
-              ? generateSlug(name)
-              : undefined,
+          slug: name ? generateSlug(name) : undefined,
 
           description,
 
@@ -203,35 +194,28 @@ export async function PATCH(
       success: true,
       product,
     });
-
   } catch (error) {
-
     return NextResponse.json(
       {
         success: false,
-        message:
-          error.message,
+        message: error.message,
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
 
-export async function DELETE(
-  request,
-  { params }
-) {
+export async function DELETE(request, { params }) {
   try {
-
     await adminMiddleware();
 
-    const {id} = await params
+    const { id } = await params;
 
     await prisma.product.update({
       where: {
-        id
+        id,
       },
 
       data: {
@@ -241,21 +225,17 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message:
-        "Product deleted successfully",
+      message: "Product deleted successfully",
     });
-
   } catch (error) {
-
     return NextResponse.json(
       {
         success: false,
-        message:
-          error.message,
+        message: error.message,
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

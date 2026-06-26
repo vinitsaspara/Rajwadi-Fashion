@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { authMiddleware } from "@/middleware/auth";
 
 import { createReviewSchema } from "@/validations/review.validation";
+import {
+  updateReviewSchema,
+} from "@/validations/review.validation";
+
 
 export async function PATCH(
   request,
@@ -16,20 +20,20 @@ export async function PATCH(
     const { id } =
       await params;
 
+      console.log("id : ", id )
+
     const body =
       await request.json();
 
     const validation =
-      createReviewSchema.safeParse(
-        body
-      );
+  updateReviewSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
           message:
-            validation.error.errors[0]
+            validation.error.issues[0]
               .message,
         },
         {
@@ -85,11 +89,13 @@ export async function PATCH(
       });
 
     const average =
-      reviews.reduce(
+  reviews.length
+    ? reviews.reduce(
         (sum, item) =>
           sum + item.rating,
         0
-      ) / reviews.length;
+      ) / reviews.length
+    : 0;
 
     await prisma.product.update({
       where: {

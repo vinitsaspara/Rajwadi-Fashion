@@ -15,17 +15,15 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const validation =
-      createProductSchema.safeParse(body);
+    const validation = createProductSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            validation.error.issues[0].message,
+          message: validation.error.issues[0].message,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -42,12 +40,11 @@ export async function POST(request) {
 
     // Check Category
 
-    const category =
-      await prisma.category.findUnique({
-        where: {
-          id: categoryId,
-        },
-      });
+    const category = await prisma.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+    });
 
     if (!category) {
       return NextResponse.json(
@@ -55,77 +52,67 @@ export async function POST(request) {
           success: false,
           message: "Category not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const slug = generateSlug(name);
 
-    const productCount =
-      await prisma.product.count();
+    const productCount = await prisma.product.count();
 
-    const sku = generateSku(
-      category.name,
-      productCount
-    );
+    const sku = generateSku(category.name, productCount);
 
-    const product =
-      await prisma.product.create({
-        data: {
-          name,
-          slug,
-          sku,
+    const product = await prisma.product.create({
+      data: {
+        name,
+        slug,
+        sku,
 
-          description,
+        description,
 
-          price,
-          discountPrice,
+        price,
+        discountPrice,
 
-          categoryId,
+        categoryId,
 
-          isFeatured,
-          isBestSeller,
+        isFeatured,
+        isBestSeller,
 
-          colors: {
-            create: colors.map((color) => ({
-              colorName:
-                color.colorName,
+        colors: {
+          create: colors.map((color) => ({
+            colorName: color.colorName,
 
-              images: color.images,
+            images: color.images,
 
-              sizes: {
-                create:
-                  color.sizes.map(
-                    (size) => ({
-                      size: size.size,
-                      stock: size.stock,
-                    })
-                  ),
-              },
-            })),
-          },
-        },
-
-        include: {
-          category: true,
-
-          colors: {
-            include: {
-              sizes: true,
+            sizes: {
+              create: color.sizes.map((size) => ({
+                size: size.size,
+                stock: size.stock,
+              })),
             },
+          })),
+        },
+      },
+
+      include: {
+        category: true,
+
+        colors: {
+          include: {
+            sizes: true,
           },
         },
-      });
+      },
+    });
 
     return NextResponse.json(
       {
         success: true,
-        message:
-          "Product created successfully",
+        message: "Product created successfully",
 
         product,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.log(error);
@@ -135,31 +122,35 @@ export async function POST(request) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(
-      request.url
-    );
+    const { searchParams } = new URL(request.url);
 
-    const page =
-      Number(searchParams.get("page")) || 1;
+    const page = Number(searchParams.get("page")) || 1;
 
-    const limit = 10;
+    const limit = Number(searchParams.get("limit")) || 12;
 
-    const search =
-      searchParams.get("search") || "";
+    const search = searchParams.get("search") || "";
 
-    const categoryId =
-      searchParams.get("categoryId");
+    const categoryId = searchParams.get("categoryId");
 
-    const isFeatured =
-      searchParams.get("isFeatured");
+    const minPrice = searchParams.get("minPrice");
 
+    const maxPrice = searchParams.get("maxPrice");
+
+    const rating = searchParams.get("rating");
+
+    const featured = searchParams.get("featured");
+
+    const bestSeller = searchParams.get("bestSeller");
+
+    const inStock = searchParams.get("inStock");
+
+    const sort = searchParams.get("sort") || "newest";
     const where = {
       isActive: true,
 
@@ -174,38 +165,118 @@ export async function GET(request) {
         categoryId,
       }),
 
-      ...(isFeatured === "true" && {
+      ...(minPrice || maxPrice
+        ? {
+            discountPrice: {
+              ...(minPrice && {
+                gte: Number(minPrice),
+              }),
+
+              ...(maxPrice && {
+                lte: Number(maxPrice),
+              }),
+            },
+          }
+        : {}),
+
+      ...(rating && {
+        averageRating: {
+          gte: Number(rating),
+        },
+      }),
+
+      ...(featured === "true" && {
         isFeatured: true,
       }),
-    };
 
-    const products =
-      await prisma.product.findMany({
-        where,
+      ...(bestSeller === "true" && {
+        isBestSeller: true,
+      }),
 
-        include: {
-          category: true,
-
-          colors: {
-            include: {
-              sizes: true,
+      ...(inStock === "true" && {
+        colors: {
+          some: {
+            sizes: {
+              some: {
+                stock: {
+                  gt: 0,
+                },
+              },
             },
           },
         },
+      }),
+    };
+    let orderBy = {
+      createdAt: "desc",
+    };
 
-        skip: (page - 1) * limit,
+    switch (sort) {
+      case "oldest":
+        orderBy = {
+          createdAt: "asc",
+        };
+        break;
 
-        take: limit,
+      case "price-low":
+        orderBy = {
+          discountPrice: "asc",
+        };
+        break;
 
-        orderBy: {
+      case "price-high":
+        orderBy = {
+          discountPrice: "desc",
+        };
+        break;
+
+      case "rating":
+        orderBy = {
+          averageRating: "desc",
+        };
+        break;
+
+      case "name-asc":
+        orderBy = {
+          name: "asc",
+        };
+        break;
+
+      case "name-desc":
+        orderBy = {
+          name: "desc",
+        };
+        break;
+
+      default:
+        orderBy = {
           createdAt: "desc",
-        },
-      });
+        };
+    }
 
-    const total =
-      await prisma.product.count({
-        where,
-      });
+    const products = await prisma.product.findMany({
+      where,
+
+      include: {
+        category: true,
+
+        colors: {
+          include: {
+            sizes: true,
+          },
+        },
+      },
+
+      orderBy,
+
+      skip: (page - 1) * limit,
+
+      take: limit,
+    });
+
+    const total = await prisma.product.count({
+      where,
+    });
 
     return NextResponse.json({
       success: true,
@@ -214,9 +285,9 @@ export async function GET(request) {
 
       page,
 
-      totalPages: Math.ceil(
-        total / limit
-      ),
+      limit,
+
+      totalPages: Math.ceil(total / limit),
 
       products,
     });
@@ -226,8 +297,9 @@ export async function GET(request) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      },
     );
   }
 }
-

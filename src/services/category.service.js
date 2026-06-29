@@ -6,5 +6,7 @@ export const getCategories = async () => {
       "/categories"
     );
 
+  // console.log(response.data)
+
   return response.data;
 };

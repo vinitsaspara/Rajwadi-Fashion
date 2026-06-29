@@ -22,7 +22,7 @@ export default function CategoryCard({
         <div className="relative h-72 overflow-hidden">
 
           <Image
-            src={category.image}
+            src={category.image || ""}
             alt={category.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

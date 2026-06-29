@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { adminMiddleware } from "@/middleware/admin";
 import { generateSlug } from "@/utils/generateSlug";
+import { uploadImage } from "@/utils/uploadImage";
 
 export async function GET(request, { params }) {
   try {
@@ -40,26 +41,73 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
+export async function PATCH(
+  request,
+  { params }
+) {
   try {
     await adminMiddleware();
 
-    const body = await request.json();
-    const { id } = await params;
+    const { id } = params;
 
-    const { name, image, description } = body;
+    const formData =
+      await request.formData();
 
-    const category = await prisma.category.update({
-      where: {
-        id,
-      },
-      data: {
-        name,
-        image,
-        description,
-        slug: generateSlug(name),
-      },
-    });
+    const name =
+      formData.get("name");
+
+    const description =
+      formData.get(
+        "description"
+      );
+
+    const image =
+      formData.get("image");
+
+    const existingCategory =
+      await prisma.category.findUnique({
+        where: {
+          id,
+        },
+      });
+
+    if (!existingCategory) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Category not found",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    let imageUrl =
+      existingCategory.image;
+
+    if (
+      image &&
+      image.size > 0
+    ) {
+      imageUrl =
+        await uploadImage(image);
+    }
+
+    const category =
+      await prisma.category.update({
+        where: {
+          id,
+        },
+
+        data: {
+          name,
+          description,
+          image: imageUrl,
+          slug: generateSlug(name),
+        },
+      });
 
     return NextResponse.json({
       success: true,
@@ -71,7 +119,9 @@ export async function PATCH(request, { params }) {
         success: false,
         message: error.message,
       },
-      { status: 500 },
+      {
+        status: 500,
+      }
     );
   }
 }

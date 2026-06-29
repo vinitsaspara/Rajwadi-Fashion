@@ -8,7 +8,7 @@ export default function CustomerLayout({
     <>
       <Navbar />
 
-      <main>
+      <main className="min-h-screen">
         {children}
       </main>
 

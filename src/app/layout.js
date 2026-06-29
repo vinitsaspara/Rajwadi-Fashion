@@ -2,8 +2,6 @@ import "./globals.css";
 import { Toaster } from "sonner";
 
 import ReduxProvider from "@/store/provider";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import Script from "next/script";
 
 export const metadata = {
@@ -16,12 +14,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <ReduxProvider>
-          <Navbar />
-
           {children}
-          <Footer />
 
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="bottom-right" />
         </ReduxProvider>
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"

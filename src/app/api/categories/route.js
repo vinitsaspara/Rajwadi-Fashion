@@ -7,31 +7,48 @@ import { generateSlug } from "@/utils/generateSlug";
 
 import { createCategorySchema } from "@/validations/category.validation";
 
+import { uploadImage } from "@/utils/uploadImage";
+
 export async function POST(request) {
   try {
     await adminMiddleware();
 
-    const body = await request.json();
+    const formData = await request.formData();
+
+    const name = formData.get("name");
+    const description = formData.get("description");
+    const image = formData.get("image");
 
     const validation =
-      createCategorySchema.safeParse(body);
+      createCategorySchema.safeParse({
+        name,
+        description,
+      });
 
     if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
           message:
-            validation?.error?.errors[0]?.message,
+            validation.error.issues[0].message,
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
-    const {
-      name,
-      image,
-      description,
-    } = validation.data;
+    if (!image || image.size === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Image is required",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const slug = generateSlug(name);
 
@@ -49,16 +66,21 @@ export async function POST(request) {
           message:
             "Category already exists",
         },
-        { status: 409 }
+        {
+          status: 409,
+        }
       );
     }
+
+    const imageUrl =
+      await uploadImage(image);
 
     const category =
       await prisma.category.create({
         data: {
           name,
           slug,
-          image,
+          image: imageUrl,
           description,
         },
       });
@@ -70,7 +92,9 @@ export async function POST(request) {
           "Category created successfully",
         category,
       },
-      { status: 201 }
+      {
+        status: 201,
+      }
     );
   } catch (error) {
     return NextResponse.json(
@@ -80,7 +104,8 @@ export async function POST(request) {
       },
       {
         status:
-          error.message === "Forbidden"
+          error.message ===
+          "Forbidden"
             ? 403
             : 500,
       }

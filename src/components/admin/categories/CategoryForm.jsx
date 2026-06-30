@@ -26,13 +26,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import Image from "next/image";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Category name is required"),
+  name: z
+    .string()
+    .min(2, "Category name is required"),
 
-  image: z.string().url("Enter a valid image URL"),
-
-  description: z.string().min(5, "Description is required"),
+  image: z
+    .any(),
+    
+  description: z
+    .string()
+    .min(5, "Description is required"),
 
   isActive: z.boolean(),
 });
@@ -45,17 +51,13 @@ export default function CategoryForm({
   const form = useForm({
     resolver: zodResolver(formSchema),
 
-    defaultValues: {
-      name: "",
-
-      image: "",
-
-      description: "",
-
-      isActive: true,
-
-      ...defaultValues,
-    },
+   defaultValues: {
+  name: "",
+  image: undefined,
+  description: "",
+  isActive: true,
+  ...defaultValues,
+},
   });
 
   useEffect(() => {
@@ -111,13 +113,13 @@ export default function CategoryForm({
 
         {/* Preview */}
 
-        {image && (
-          <img
-            src={image}
-            alt="Preview"
-            className="w-36 h-36 rounded-lg object-cover border"
-          />
-        )}
+        {image instanceof File && (
+  <img
+    src={URL.createObjectURL(image)}
+    alt="Preview"
+    className="w-36 h-36 rounded-lg object-cover border"
+  />
+)}
 
         {/* Description */}
 

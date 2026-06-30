@@ -1,5 +1,42 @@
 import axiosInstance from "./axios";
 
+
+export const createCategory = async (
+  data
+) => {
+  const formData =
+    new FormData();
+
+  formData.append(
+    "name",
+    data.name
+  );
+
+  formData.append(
+    "description",
+    data.description
+  );
+
+  formData.append(
+    "image",
+    data.image
+  );
+
+  const response =
+    await axiosInstance.post(
+      "/categories",
+      formData,
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      }
+    );
+
+  return response.data;
+};
+
 export const getCategories = async () => {
   const response =
     await axiosInstance.get(
@@ -23,36 +60,41 @@ export const getCategoryById = async (
   return response.data;
 };
 
-export const updateCategory =
-  async (id, data) => {
-    const formData =
-      new FormData();
+export const updateCategory = async (
+  id,
+  data
+) => {
+  const formData = new FormData();
 
+  formData.append("name", data.name);
+
+  formData.append(
+    "description",
+    data.description
+  );
+
+  // Only send image if user selected a new one
+  if (data.image instanceof File) {
     formData.append(
-      "name",
-      data.name
+      "image",
+      data.image
+    );
+  }
+
+  const response =
+    await axiosInstance.patch(
+      `/categories/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      }
     );
 
-    formData.append(
-      "description",
-      data.description
-    );
-
-    if (data.image) {
-      formData.append(
-        "image",
-        data.image
-      );
-    }
-
-    const response =
-      await axiosInstance.patch(
-        `/categories/${id}`,
-        formData
-      );
-
-    return response.data;
-  };
+  return response.data;
+};
 
 export const deleteCategory = async (
   id
@@ -65,31 +107,3 @@ export const deleteCategory = async (
   return response.data;
 };
 
-export const createCategory =
-  async (data) => {
-    const formData =
-      new FormData();
-
-    formData.append(
-      "name",
-      data.name
-    );
-
-    formData.append(
-      "description",
-      data.description
-    );
-
-    formData.append(
-      "image",
-      data.image
-    );
-
-    const response =
-      await axiosInstance.post(
-        "/categories",
-        formData
-      );
-
-    return response.data;
-  };

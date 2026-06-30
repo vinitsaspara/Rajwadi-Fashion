@@ -41,73 +41,62 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PATCH(
-  request,
-  { params }
-) {
+export async function PATCH(request, { params }) {
   try {
     await adminMiddleware();
 
-    const { id } = params;
+    const { id } = await params;
+    console.log("id : ", id);
 
-    const formData =
-      await request.formData();
+    const formData = await request.formData();
 
-    const name =
-      formData.get("name");
+    const name = formData.get("name");
 
-    const description =
-      formData.get(
-        "description"
-      );
+    const description = formData.get("description");
 
-    const image =
-      formData.get("image");
+    const image = formData.get("image");
 
-    const existingCategory =
-      await prisma.category.findUnique({
-        where: {
-          id,
-        },
-      });
+    const existingCategory = await prisma.category.findUnique({
+      where: {
+        id,
+      },
+    });
 
     if (!existingCategory) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Category not found",
+          message: "Category not found",
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
-    let imageUrl =
-      existingCategory.image;
+    let imageUrl = existingCategory.image;
 
-    if (
-      image &&
-      image.size > 0
-    ) {
-      imageUrl =
-        await uploadImage(image);
+    if (image && image.size > 0) {
+      imageUrl = await uploadImage(image);
     }
 
-    const category =
-      await prisma.category.update({
-        where: {
-          id,
-        },
+    const updatedName = name || existingCategory.name;
 
-        data: {
-          name,
-          description,
-          image: imageUrl,
-          slug: generateSlug(name),
-        },
-      });
+    const updatedDescription = description || existingCategory.description;
+
+    const updatedSlug = generateSlug(updatedName);
+
+    const category = await prisma.category.update({
+      where: {
+        id,
+      },
+      data: {
+        name: updatedName,
+        description: updatedDescription,
+        image: imageUrl,
+        slug: updatedSlug,
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -121,7 +110,7 @@ export async function PATCH(
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

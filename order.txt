@@ -11,4 +11,19 @@ app/admin/categories/edit/[id]/page.js
 
 
 
+We'll build the Product module in the same incremental way we used for Categories:
 
+product.service.js
+ProductForm.jsx
+app/admin/products/add/page.js
+Backend POST integration (FormData + Cloudinary)
+app/admin/products/page.js
+ProductTable.jsx
+ProductRow.jsx
+ProductSearch.jsx
+DeleteProductDialog.jsx
+EmptyProduct.jsx
+ProductSkeleton.jsx
+app/admin/products/edit/[id]/page.js
+Backend PATCH integration
+Final polish (filters, pagination, search)

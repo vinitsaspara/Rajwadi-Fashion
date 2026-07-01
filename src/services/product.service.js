@@ -1,5 +1,6 @@
 import axiosInstance from "./axios";
 
+// Get Products
 export const getProducts = async (params = {}) => {
   const response = await axiosInstance.get("/products", {
     params,
@@ -8,15 +9,65 @@ export const getProducts = async (params = {}) => {
   return response.data;
 };
 
+// Get Product By Id
 export const getProductById = async (id) => {
   const response = await axiosInstance.get(`/products/${id}`);
 
   return response.data;
 };
 
-export const searchProducts = async (query, limit = 8) => {
+// Create Product
+export const createProduct = async (
+  formData
+) => {
+  const response =
+    await axiosInstance.post(
+      "/products",
+      formData,
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      }
+    );
+
+  return response.data;
+};
+
+// Update Product
+export const updateProduct = async (id, formData) => {
+  const response = await axiosInstance.patch(
+    `/products/${id}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+// Delete Product
+export const deleteProduct = async (id) => {
+  const response = await axiosInstance.delete(
+    `/products/${id}`
+  );
+
+  return response.data;
+};
+
+// Search Products
+export const searchProducts = async (
+  query,
+  limit = 8
+) => {
   const response = await axiosInstance.get(
-    `/products/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+    `/products/search?q=${encodeURIComponent(
+      query
+    )}&limit=${limit}`
   );
 
   return response.data;

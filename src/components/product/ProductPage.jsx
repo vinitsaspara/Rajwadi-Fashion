@@ -10,7 +10,6 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { useSearchParams } from "next/navigation";
 
-import { Search } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -24,7 +23,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { Button } from "@/components/ui/button";
 
-import { Input } from "@/components/ui/input";
 
 export default function ProductPage() {
   const dispatch = useDispatch();

@@ -7,15 +7,45 @@ import { adminMiddleware } from "@/middleware/admin";
 import { generateSlug } from "@/utils/generateSlug";
 import { generateSku } from "@/utils/generateSku";
 
+import { uploadImage } from "@/utils/uploadImage";
+
 import { createProductSchema } from "@/validations/product.validation";
+
 
 export async function POST(request) {
   try {
     await adminMiddleware();
 
-    const body = await request.json();
+    const formData = await request.formData();
 
-    const validation = createProductSchema.safeParse(body);
+    const name = formData.get("name");
+
+    const description = formData.get("description");
+
+    const price = Number(formData.get("price"));
+
+    const discountPrice = formData.get("discountPrice")
+      ? Number(formData.get("discountPrice"))
+      : null;
+
+    const categoryId = formData.get("categoryId");
+
+    const isFeatured = formData.get("isFeatured") === "true";
+
+    const isBestSeller = formData.get("isBestSeller") === "true";
+
+    const colors = JSON.parse(formData.get("colors"));
+
+    const validation = createProductSchema.safeParse({
+      name,
+      description,
+      price,
+      discountPrice,
+      categoryId,
+      isFeatured,
+      isBestSeller,
+      colors,
+    });
 
     if (!validation.success) {
       return NextResponse.json(
@@ -23,26 +53,16 @@ export async function POST(request) {
           success: false,
           message: validation.error.issues[0].message,
         },
-        { status: 400 },
+        {
+          status: 400,
+        },
       );
     }
 
-    const {
-      name,
-      description,
-      price,
-      discountPrice,
-      categoryId,
-      colors,
-      isFeatured,
-      isBestSeller,
-    } = validation.data;
-
-    // Check Category
-
-    const category = await prisma.category.findUnique({
+    const category = await prisma.category.findFirst({
       where: {
         id: categoryId,
+        isActive: true,
       },
     });
 
@@ -52,7 +72,9 @@ export async function POST(request) {
           success: false,
           message: "Category not found",
         },
-        { status: 404 },
+        {
+          status: 404,
+        },
       );
     }
 
@@ -62,24 +84,75 @@ export async function POST(request) {
 
     const sku = generateSku(category.name, productCount);
 
+    // Upload Images for Every Color
+
+    const formattedColors = [];
+
+    for (let i = 0; i < colors.length; i++) {
+      const color = colors[i];
+
+      // Get all uploaded files for this color
+      const imageFiles = formData.getAll(`colorImages-${i}`);
+
+      if (imageFiles.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Please upload at least one image for ${color.colorName}`,
+          },
+          {
+            status: 400,
+          },
+        );
+      }
+
+      const imageUrls = [];
+
+      for (const file of imageFiles) {
+        if (file.size === 0) {
+          continue;
+        }
+
+        const imageUrl = await uploadImage(file);
+
+        imageUrls.push(imageUrl);
+      }
+
+      formattedColors.push({
+        colorName: color.colorName,
+
+        images: imageUrls,
+
+        sizes: color.sizes.map((size) => ({
+          size: size.size,
+
+          stock: Number(size.stock),
+        })),
+      });
+    }
+
     const product = await prisma.product.create({
       data: {
         name,
+
         slug,
+
         sku,
 
         description,
 
         price,
+
         discountPrice,
 
         categoryId,
 
         isFeatured,
+
         isBestSeller,
 
         colors: {
-          create: colors.map((color) => ({
+          create: formattedColors.map((color) => ({
             colorName: color.colorName,
 
             images: color.images,
@@ -87,6 +160,7 @@ export async function POST(request) {
             sizes: {
               create: color.sizes.map((size) => ({
                 size: size.size,
+
                 stock: size.stock,
               })),
             },
@@ -108,24 +182,31 @@ export async function POST(request) {
     return NextResponse.json(
       {
         success: true,
+
         message: "Product created successfully",
 
         product,
       },
-      { status: 201 },
+      {
+        status: 201,
+      },
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return NextResponse.json(
       {
         success: false,
+
         message: error.message,
       },
-      { status: 500 },
+      {
+        status: error.message === "Forbidden" ? 403 : 500,
+      },
     );
   }
 }
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
